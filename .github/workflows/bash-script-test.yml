@@ -1,0 +1,203 @@
+name: Bash Script Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  basic-bash-commands:
+    name: Basic Bash Commands
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Print System Information
+        run: |
+          echo "=== System Information ==="
+          echo "OS: $(uname -s)"
+          echo "Kernel: $(uname -r)"
+          echo "Architecture: $(uname -m)"
+          echo "Hostname: $(hostname)"
+          echo ""
+          echo "=== Disk Usage ==="
+          df -h | head -n 5
+          echo ""
+          echo "=== Memory Information ==="
+          free -h
+
+      - name: Environment Variables
+        run: |
+          echo "=== GitHub Environment Variables ==="
+          echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
+          echo "GITHUB_REF: $GITHUB_REF"
+          echo "GITHUB_SHA: $GITHUB_SHA"
+          echo "GITHUB_ACTOR: $GITHUB_ACTOR"
+          echo "GITHUB_WORKFLOW: $GITHUB_WORKFLOW"
+          echo "GITHUB_RUN_ID: $GITHUB_RUN_ID"
+          echo "GITHUB_RUN_NUMBER: $GITHUB_RUN_NUMBER"
+
+      - name: Working with Files
+        run: |
+          echo "=== Repository Files ==="
+          ls -lah
+          echo ""
+          echo "=== Git Status ==="
+          git status
+          echo ""
+          echo "=== Git Log (last 5 commits) ==="
+          git log --oneline -5
+
+  file-operations:
+    name: File Operations with Bash
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create and Manipulate Files
+        run: |
+          echo "Creating test files..."
+          echo "Hello, World!" > /tmp/test.txt
+          echo "Line 2" >> /tmp/test.txt
+          echo "Line 3" >> /tmp/test.txt
+          
+          echo "=== File Contents ==="
+          cat /tmp/test.txt
+          
+          echo ""
+          echo "=== Word Count ==="
+          wc -l /tmp/test.txt
+          
+          echo ""
+          echo "=== Searching with grep ==="
+          echo "Searching for 'World':"
+          grep "World" /tmp/test.txt || echo "Not found"
+
+      - name: JSON Processing with jq
+        run: |
+          echo "=== Testing JSON with jq ==="
+          echo '{"name":"test-repo","version":"1.0.0","workflows":["bash","github-script"]}' > /tmp/test.json
+          
+          echo "Original JSON:"
+          cat /tmp/test.json
+          
+          echo ""
+          echo "Extracting name:"
+          jq -r '.name' /tmp/test.json
+          
+          echo ""
+          echo "Extracting workflows:"
+          jq -r '.workflows[]' /tmp/test.json
+
+      - name: Working with Arrays and Loops
+        run: |
+          echo "=== Array Operations ==="
+          files=("file1.txt" "file2.txt" "file3.txt")
+          
+          for file in "${files[@]}"; do
+            echo "Processing: $file"
+            echo "Content of $file" > "/tmp/$file"
+          done
+          
+          echo ""
+          echo "=== Created Files ==="
+          ls -lh /tmp/*.txt
+
+  advanced-bash-scripting:
+    name: Advanced Bash Scripting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Conditional Logic
+        run: |
+          echo "=== Testing Conditional Logic ==="
+          
+          # Check if running on main/master branch
+          if [[ "$GITHUB_REF" == "refs/heads/main" ]] || [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+            echo "Running on main/master branch"
+          else
+            echo "Running on branch: ${GITHUB_REF#refs/heads/}"
+          fi
+          
+          # Check file existence
+          if [ -f "README.md" ]; then
+            echo "README.md exists"
+            echo "Size: $(wc -c < README.md) bytes"
+          else
+            echo "README.md not found"
+          fi
+
+      - name: Functions and Error Handling
+        run: |
+          # Define a function
+          process_file() {
+            local file=$1
+            if [ -f "$file" ]; then
+              echo "Processing $file..."
+              echo "Lines: $(wc -l < "$file")"
+              return 0
+            else
+              echo "Error: File $file not found" >&2
+              return 1
+            fi
+          }
+          
+          echo "=== Function Testing ==="
+          process_file "README.md"
+          
+          echo ""
+          echo "=== Error Handling ==="
+          set +e  # Don't exit on error
+          process_file "nonexistent.txt"
+          exit_code=$?
+          echo "Function returned: $exit_code"
+          set -e  # Re-enable exit on error
+
+      - name: Multi-line Commands and Piping
+        run: |
+          echo "=== Complex Pipeline ==="
+          echo "Finding all YAML files:"
+          find . -name "*.yml" -o -name "*.yaml" | while read -r file; do
+            echo "  - $file ($(wc -l < "$file") lines)"
+          done
+
+  bash-with-outputs:
+    name: Bash Script with Outputs
+    runs-on: ubuntu-latest
+    outputs:
+      timestamp: ${{ steps.set-output.outputs.timestamp }}
+      file-count: ${{ steps.set-output.outputs.file-count }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate Outputs
+        id: set-output
+        run: |
+          timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          file_count=$(find . -type f | wc -l)
+          
+          echo "timestamp=$timestamp" >> $GITHUB_OUTPUT
+          echo "file-count=$file_count" >> $GITHUB_OUTPUT
+          
+          echo "Generated timestamp: $timestamp"
+          echo "Total files: $file_count"
+
+  use-bash-outputs:
+    name: Use Bash Outputs
+    runs-on: ubuntu-latest
+    needs: bash-with-outputs
+    steps:
+      - name: Display Outputs
+        run: |
+          echo "Timestamp from previous job: ${{ needs.bash-with-outputs.outputs.timestamp }}"
+          echo "File count from previous job: ${{ needs.bash-with-outputs.outputs.file-count }}"

@@ -1,0 +1,53 @@
+{
+  "project": "github-actions-tests",
+  "description": "A repository for testing GitHub Actions workflows",
+  "workflows": [
+    {
+      "name": "github-script-test",
+      "file": ".github/workflows/github-script-test.yml",
+      "description": "Tests various github-script operations",
+      "jobs": [
+        "basic-github-script",
+        "advanced-github-script",
+        "github-script-with-output"
+      ]
+    },
+    {
+      "name": "bash-script-test",
+      "file": ".github/workflows/bash-script-test.yml",
+      "description": "Tests various bash script operations",
+      "jobs": [
+        "basic-bash-commands",
+        "file-operations",
+        "advanced-bash-scripting"
+      ]
+    },
+    {
+      "name": "mixed-test",
+      "file": ".github/workflows/mixed-test.yml",
+      "description": "Tests combining github-script and bash operations",
+      "jobs": [
+        "prepare-with-bash",
+        "process-with-github-script",
+        "verify-with-bash",
+        "mixed-operations"
+      ]
+    }
+  ],
+  "features": [
+    "GitHub API interactions via github-script",
+    "Bash scripting and file operations",
+    "Job outputs and dependencies",
+    "Artifact upload and download",
+    "Conditional execution",
+    "Data processing pipelines"
+  ],
+  "test_scenarios": [
+    "Repository information retrieval",
+    "Commit history analysis",
+    "File system operations",
+    "JSON processing",
+    "Cross-job data passing",
+    "Mixed script execution"
+  ]
+}
