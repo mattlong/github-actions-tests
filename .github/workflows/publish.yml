@@ -2,16 +2,17 @@ name: Publish
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 jobs:
   build_and_check:
     name: publish
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
     permissions:
       actions: read
-      contents: write
-      pull-requests: write
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

@@ -3,3 +3,4 @@
 echo $1 > version.txt
 git add version.txt
 git commit -m "Bump to v$1"
+git tag "v$1"
