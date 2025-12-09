@@ -1,10 +1,8 @@
 name: Publish
-# Based on: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
 on:
   push:
     tags:
       - 'v*'
-  # workflow_dispatch:
 jobs:
   build_and_check:
     name: publish
@@ -55,20 +53,22 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Run when latest
-        needs: [check-latest]
-        if: needs.check-latest.result == 'true'
+        if: steps.check-latest.outputs.result == 'true'
         run: echo "Run when latest was executed"
 
       - name: Skip when latest
-        needs: [check-latest]
-        if: needs.check-latest.result != 'true'
+        if: steps.check-latest.outputs.result != 'true'
         run: echo "Skip when latest was executed"
 
       - name: Conditional when latest
         run: |
-          if [ "${{ needs.check-latest.result }}" = "true" ]; then
+          if [ "${{ steps.check-latest.outputs.result }}" = "true" ]; then
             echo "Conditional when latest IF was executed"
           else
             echo "Conditional when latest ELSE was executed"
           fi
 
+      - name: Always last step
+        run: |
+          echo "${{ steps.check-latest }}"
+          echo "${{ steps.check-latest.outputs }}"
