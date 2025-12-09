@@ -1,0 +1,74 @@
+name: Publish
+# Based on: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
+on:
+  push:
+    tags:
+      - 'v*'
+  # workflow_dispatch:
+jobs:
+  build_and_check:
+    name: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NODE_VERSION: '20'
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_CACHE: 'remote:rw'
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check if latest release
+        id: check-latest
+        uses: actions/github-script@v8
+        with:
+          result-encoding: string
+          script: |
+            const semver = require('semver');
+            const currentTag = context.ref.replace("refs/tags/", "");
+            const currentVersion = semver.clean(currentTag);
+            console.log(`Current: ${currentVersion}`);
+
+            const latestRelease = await github.rest.repos.getLatestRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            const latestVersion = semver.clean(latestRelease.data.tag_name);
+            console.log(`Latest: ${latestVersion}`);
+
+            const isLatest = semver.gte(currentVersion, latestVersion);
+            console.log(`IsLatest: ${isLatest}`);
+
+            return isLatest.toString();
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Run when latest
+        needs: [check-latest]
+        if: needs.check-latest.result == 'true'
+        run: echo "Run when latest was executed"
+
+      - name: Skip when latest
+        needs: [check-latest]
+        if: needs.check-latest.result != 'true'
+        run: echo "Skip when latest was executed"
+
+      - name: Conditional when latest
+        run: |
+          if [ "${{ needs.check-latest.result }}" = "true" ]; then
+            echo "Conditional when latest IF was executed"
+          else
+            echo "Conditional when latest ELSE was executed"
+          fi
+
