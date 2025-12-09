@@ -19,6 +19,10 @@ on:
         default: 'Running demo workflow'
         type: string
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   demo-info:
     name: Demo Information
