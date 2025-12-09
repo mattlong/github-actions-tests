@@ -47,6 +47,17 @@ Demonstrates combining github-script and bash in complex workflows:
 
 **Trigger**: Push to main/master, Pull Requests, Manual dispatch
 
+### 4. Demo Workflow (`demo.yml`)
+
+An interactive demo workflow with customizable inputs:
+
+- **Workflow Inputs**: Choose test type (all, github-script, bash, mixed) and custom message
+- **Conditional Jobs**: Runs only selected test types
+- **Comprehensive Examples**: Shows real-world usage of all workflow types
+- **Summary Report**: Displays results from all executed jobs
+
+**Trigger**: Manual dispatch only (with inputs)
+
 ## Repository Structure
 
 ```
@@ -55,12 +66,14 @@ Demonstrates combining github-script and bash in complex workflows:
 │   └── workflows/
 │       ├── github-script-test.yml    # GitHub Script workflow examples
 │       ├── bash-script-test.yml      # Bash script workflow examples
-│       └── mixed-test.yml            # Mixed workflow examples
+│       ├── mixed-test.yml            # Mixed workflow examples
+│       └── demo.yml                  # Interactive demo workflow
 ├── test-data/
 │   ├── workflows.json                # Sample JSON data
 │   └── sample.txt                    # Sample text file
 ├── scripts/
 │   └── test-script.sh                # Sample bash script
+├── CONTRIBUTING.md                   # Guide for contributors
 └── README.md
 ```
 
@@ -85,6 +98,17 @@ All workflows support manual triggering via workflow_dispatch:
 2. Select the workflow you want to run
 3. Click **Run workflow**
 4. Choose the branch and click **Run workflow**
+
+#### Demo Workflow with Inputs
+
+The demo workflow provides interactive options:
+
+1. Go to **Actions** → **Demo Workflow**
+2. Click **Run workflow**
+3. Choose options:
+   - **Test type**: Select 'all', 'github-script', 'bash', or 'mixed'
+   - **Custom message**: Enter a message to display in the workflow
+4. Click **Run workflow** to start
 
 ### Testing Locally
 
