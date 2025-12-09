@@ -93,10 +93,22 @@ jobs:
         with:
           script: |
             try {
+              // Extract branch name, handling different ref types
+              let branch = context.ref;
+              if (branch.startsWith('refs/heads/')) {
+                branch = branch.replace('refs/heads/', '');
+              } else if (branch.startsWith('refs/tags/')) {
+                console.log('Tag refs do not have branch protection');
+                return;
+              } else {
+                console.log(`Skipping branch protection check for ref type: ${branch}`);
+                return;
+              }
+              
               const { data: protection } = await github.rest.repos.getBranchProtection({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                branch: context.ref.replace('refs/heads/', '')
+                branch: branch
               });
               console.log('Branch protection is enabled');
               console.log(`Required status checks: ${JSON.stringify(protection.required_status_checks)}`);

@@ -107,15 +107,21 @@ jobs:
           echo "Message: ${{ inputs.message }}"
           
           mkdir -p /tmp/demo
-          cat > /tmp/demo/data.json << EOF
-          {
-            "workflow": "demo",
-            "type": "${{ inputs.test_type }}",
-            "message": "${{ inputs.message }}",
-            "actor": "${{ github.actor }}",
-            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          }
-          EOF
+          
+          # Create JSON safely with jq to handle special characters
+          jq -n \
+            --arg workflow "demo" \
+            --arg type "${{ inputs.test_type }}" \
+            --arg message "${{ inputs.message }}" \
+            --arg actor "${{ github.actor }}" \
+            --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{
+              workflow: $workflow,
+              type: $type,
+              message: $message,
+              actor: $actor,
+              timestamp: $timestamp
+            }' > /tmp/demo/data.json
           
           echo "Created data file:"
           cat /tmp/demo/data.json

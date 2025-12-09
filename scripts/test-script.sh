@@ -61,7 +61,7 @@ if [ -d "$test_data_dir" ]; then
     if [ -f "$test_data_dir/workflows.json" ]; then
         echo ""
         echo "Processing workflows.json..."
-        if command -v jq &> /dev/null; then
+        if command -v jq > /dev/null 2>&1; then
             workflow_count=$(jq '.workflows | length' "$test_data_dir/workflows.json")
             echo "Workflows defined: $workflow_count"
         else
