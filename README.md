@@ -74,6 +74,7 @@ An interactive demo workflow with customizable inputs:
 ├── scripts/
 │   └── test-script.sh                # Sample bash script
 ├── CONTRIBUTING.md                   # Guide for contributors
+├── QUICKREF.md                       # Quick reference guide
 └── README.md
 ```
 
@@ -248,12 +249,22 @@ You can extend this repository by:
 - Check for syntax errors in scripts
 - Verify paths are correct (use absolute paths when needed)
 
+## Quick Reference
+
+See [QUICKREF.md](QUICKREF.md) for:
+- Command cheat sheet
+- Common patterns and examples
+- Context variables reference
+- Troubleshooting tips
+- Links to specific examples in this repository
+
 ## Resources
 
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [github-script Action](https://github.com/actions/github-script)
 - [Workflow Syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions)
 - [GitHub REST API](https://docs.github.com/en/rest)
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Guide for extending this repository
 
 ## License
 
