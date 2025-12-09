@@ -150,13 +150,13 @@ run: echo "${{ needs.job-name.outputs.key }}"
 ### Upload/Download Artifacts
 ```yaml
 # Upload
-- uses: actions/upload-artifact@v4
+- uses: actions/upload-artifact@v4.3.3
   with:
     name: my-data
     path: path/to/file.txt
 
 # Download in another job
-- uses: actions/download-artifact@v4
+- uses: actions/download-artifact@v4.1.7
   with:
     name: my-data
     path: ./downloaded
