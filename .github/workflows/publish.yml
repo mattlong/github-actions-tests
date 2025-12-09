@@ -8,13 +8,6 @@ jobs:
     name: publish
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      NODE_VERSION: '20'
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_CACHE: 'remote:rw'
     permissions:
       actions: read
       contents: write
@@ -25,32 +18,23 @@ jobs:
 
       - name: Check if latest release
         id: check-latest
-        uses: actions/github-script@v8
-        with:
-          result-encoding: string
-          script: |
-            const semver = require('semver');
-            const currentTag = context.ref.replace("refs/tags/", "");
-            const currentVersion = semver.clean(currentTag);
-            console.log(`Current: ${currentVersion}`);
+        run: |
+          CURRENT_TAG="${GITHUB_REF#refs/tags/}"
+          echo "Current Tag: ${CURRENT_TAG}"
 
-            const latestRelease = await github.rest.repos.getLatestRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
-            const latestVersion = semver.clean(latestRelease.data.tag_name);
-            console.log(`Latest: ${latestVersion}`);
+          LATEST_TAG=$(gh release list --order desc --limit 1 --json tagName -q '.[].tagName')
+          echo "Latest Tag: ${LATEST_TAG}"
 
-            const isLatest = semver.gte(currentVersion, latestVersion);
-            console.log(`IsLatest: ${isLatest}`);
+          HIGHEST_TAG=$(printf '%s\n%s\n' "${CURRENT_TAG}" "${LATEST_TAG}" | sort -V | tail -n1)
+          echo "Highest Tag: ${HIGHEST_TAG}"
 
-            return isLatest.toString();
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: 'https://registry.npmjs.org'
+          if [ "${CURRENT_TAG}" = "${HIGHEST_TAG}" ]; then
+            echo "Current tag is the latest."
+            echo "::set-output name=result::true"
+          else
+            echo "Current tag is not the latest."
+            echo "::set-output name=result::false"
+          fi
 
       - name: Run when latest
         if: steps.check-latest.outputs.result == 'true'
