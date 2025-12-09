@@ -1,0 +1,230 @@
+name: Mixed GitHub Script and Bash Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  prepare-with-bash:
+    name: Prepare Data with Bash
+    runs-on: ubuntu-latest
+    outputs:
+      data-file: ${{ steps.create-data.outputs.data-file }}
+      record-count: ${{ steps.create-data.outputs.record-count }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Test Data
+        id: create-data
+        run: |
+          echo "Creating test data file..."
+          
+          cat > /tmp/test-data.json << 'EOF'
+          {
+            "repository": "github-actions-tests",
+            "workflows": [
+              {"name": "github-script-test", "type": "github-script"},
+              {"name": "bash-script-test", "type": "bash"},
+              {"name": "mixed-test", "type": "mixed"}
+            ],
+            "features": ["testing", "validation", "automation"]
+          }
+          EOF
+          
+          echo "data-file=/tmp/test-data.json" >> $GITHUB_OUTPUT
+          
+          record_count=$(jq '.workflows | length' /tmp/test-data.json)
+          echo "record-count=$record_count" >> $GITHUB_OUTPUT
+          
+          echo "Created data file with $record_count workflow records"
+          cat /tmp/test-data.json
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-data
+          path: /tmp/test-data.json
+
+  process-with-github-script:
+    name: Process Data with GitHub Script
+    runs-on: ubuntu-latest
+    needs: prepare-with-bash
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: test-data
+          path: /tmp
+
+      - name: Process with GitHub Script
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('/tmp/test-data.json', 'utf8'));
+            
+            console.log('=== Processing Test Data ===');
+            console.log(`Repository: ${data.repository}`);
+            console.log(`Workflow count: ${data.workflows.length}`);
+            
+            console.log('\nWorkflows:');
+            data.workflows.forEach((workflow, index) => {
+              console.log(`  ${index + 1}. ${workflow.name} (${workflow.type})`);
+            });
+            
+            console.log('\nFeatures:');
+            data.features.forEach(feature => {
+              console.log(`  - ${feature}`);
+            });
+            
+            // Fetch actual repository data for comparison
+            const { data: repo } = await github.rest.repos.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            console.log(`\n=== Actual Repository Info ===`);
+            console.log(`Name: ${repo.name}`);
+            console.log(`Default Branch: ${repo.default_branch}`);
+            console.log(`Stars: ${repo.stargazers_count}`);
+            console.log(`Forks: ${repo.forks_count}`);
+
+  verify-with-bash:
+    name: Verify Results with Bash
+    runs-on: ubuntu-latest
+    needs: [prepare-with-bash, process-with-github-script]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: test-data
+          path: /tmp
+
+      - name: Verify Data
+        run: |
+          echo "=== Verification Report ==="
+          echo "Expected record count: ${{ needs.prepare-with-bash.outputs.record-count }}"
+          
+          if [ -f "/tmp/test-data.json" ]; then
+            echo "Data file exists: ✓"
+            
+            actual_count=$(jq '.workflows | length' /tmp/test-data.json)
+            echo "Actual record count: $actual_count"
+            
+            if [ "$actual_count" -eq "${{ needs.prepare-with-bash.outputs.record-count }}" ]; then
+              echo "Record count matches: ✓"
+            else
+              echo "Record count mismatch: ✗"
+              exit 1
+            fi
+          else
+            echo "Data file not found: ✗"
+            exit 1
+          fi
+
+  mixed-operations:
+    name: Mixed Operations in Single Job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Step 1 - Bash Setup
+        run: |
+          echo "=== Setting up with Bash ==="
+          mkdir -p /tmp/mixed-test
+          echo '{"step": 1, "type": "bash", "status": "complete"}' > /tmp/mixed-test/step1.json
+          cat /tmp/mixed-test/step1.json
+
+      - name: Step 2 - GitHub Script Processing
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            console.log('=== Processing with GitHub Script ===');
+            
+            const step1Data = JSON.parse(fs.readFileSync('/tmp/mixed-test/step1.json', 'utf8'));
+            console.log('Previous step data:', step1Data);
+            
+            const step2Data = {
+              step: 2,
+              type: 'github-script',
+              status: 'complete',
+              repo: context.repo.repo,
+              sha: context.sha.substring(0, 7)
+            };
+            
+            fs.writeFileSync('/tmp/mixed-test/step2.json', JSON.stringify(step2Data, null, 2));
+            console.log('Created step 2 data:', step2Data);
+
+      - name: Step 3 - Bash Verification
+        run: |
+          echo "=== Verifying with Bash ==="
+          
+          if [ -f "/tmp/mixed-test/step1.json" ] && [ -f "/tmp/mixed-test/step2.json" ]; then
+            echo "Both files exist: ✓"
+            
+            echo ""
+            echo "Step 1 data:"
+            cat /tmp/mixed-test/step1.json
+            
+            echo ""
+            echo "Step 2 data:"
+            cat /tmp/mixed-test/step2.json
+            
+            echo ""
+            echo "=== Combined Results ==="
+            jq -s '.' /tmp/mixed-test/step1.json /tmp/mixed-test/step2.json
+          else
+            echo "Files missing: ✗"
+            exit 1
+          fi
+
+      - name: Step 4 - Final GitHub Script Summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('=== Final Summary ===');
+            console.log('All steps completed successfully!');
+            console.log(`Repository: ${context.repo.owner}/${context.repo.repo}`);
+            console.log(`Event: ${context.eventName}`);
+            console.log(`SHA: ${context.sha}`);
+            console.log(`Workflow: ${context.workflow}`);
+            console.log(`Job: ${context.job}`);
+
+  conditional-execution:
+    name: Conditional Execution Example
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run on Push Only
+        if: github.event_name == 'push'
+        run: |
+          echo "This step runs only on push events"
+          echo "Branch: ${GITHUB_REF#refs/heads/}"
+
+      - name: Run on PR Only
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('This step runs only on pull request events');
+            console.log(`PR Number: ${context.issue.number}`);
+            console.log(`PR Title: ${context.payload.pull_request.title}`);
+
+      - name: Always Run
+        if: always()
+        run: |
+          echo "This step always runs, regardless of previous step failures"
