@@ -1,6 +1,6 @@
 {
   "name": "@mattlong/gat",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Package management test bed",
   "homepage": "https://github.com/mattlong/github-actions-tests#readme",
   "bugs": {
