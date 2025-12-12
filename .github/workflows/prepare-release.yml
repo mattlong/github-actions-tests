@@ -38,4 +38,5 @@ jobs:
       - name: Prepare release
         run: ./scripts/prepare-release.sh ${{ inputs.version }}
         env:
+          GITHUB_TOKEN: ${{ secrets.GAT_BOT_GITHUB_ACCESS_TOKEN }}
           IS_LATEST: ${{ inputs.is_latest }}
