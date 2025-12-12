@@ -68,7 +68,7 @@ git commit -s -m "Release Version $NEW_VERSION" -m "$RELEASE_NOTES"
 git push origin "$BRANCH_NAME"
 
 # Create pull request
-# gh pr create --title "Release Version $NEW_VERSION" --body "$RELEASE_NOTES" --base "$GITHUB_REF_NAME"
+gh pr create --title "Release Version $NEW_VERSION" --body "$RELEASE_NOTES" --base "$GITHUB_REF_NAME"
 
 # Create draft release
-# gh release create "v$NEW_VERSION" --notes "$RELEASE_NOTES" --title "Version $NEW_VERSION" --draft --latest=$IS_LATEST
+gh release create "v$NEW_VERSION" --notes "$RELEASE_NOTES" --title "Version $NEW_VERSION" --draft --latest=$IS_LATEST
