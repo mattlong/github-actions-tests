@@ -1,0 +1,18 @@
+{
+  "name": "github-actions-tests",
+  "version": "1.0.0",
+  "description": "Package management test bed",
+  "homepage": "https://github.com/mattlong/github-actions-tests#readme",
+  "bugs": {
+    "url": "https://github.com/mattlong/github-actions-tests/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mattlong/github-actions-tests.git"
+  },
+  "license": "MIT",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {}
+}
