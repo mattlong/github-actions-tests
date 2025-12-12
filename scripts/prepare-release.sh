@@ -28,7 +28,7 @@ if [[ "${IS_LATEST}" != "true" && "${IS_LATEST}" != "false" ]]; then
 fi
 
 # By default, increase the patch version
-((CURR_VERSION_PARTS[2]++))
+((CURR_VERSION_PARTS[2]++)) || true
 
 # Build the new version number
 NEW_VERSION="${CURR_VERSION_PARTS[0]}.${CURR_VERSION_PARTS[1]}.${CURR_VERSION_PARTS[2]}"
