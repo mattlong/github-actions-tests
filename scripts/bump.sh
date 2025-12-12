@@ -9,4 +9,3 @@ npm version "$NEW_VERSION"
 git add package.json package-lock.json
 
 git commit -m "Bump to v$1"
-git tag "v$1"
