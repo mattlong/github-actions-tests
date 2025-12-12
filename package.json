@@ -11,8 +11,52 @@
     "url": "git+https://github.com/mattlong/github-actions-tests.git"
   },
   "license": "MIT",
-  "author": "",
+  "sideEffects": false,
   "type": "module",
-  "main": "index.js",
-  "scripts": {}
+  "exports": {
+    "import": {
+      "types": "./dist/esm/index.d.ts",
+      "default": "./dist/esm/index.mjs"
+    },
+    "require": {
+      "types": "./dist/cjs/index.d.ts",
+      "default": "./dist/cjs/index.cjs"
+    }
+  },
+  "main": "dist/cjs/index.cjs",
+  "module": "dist/esm/index.mjs",
+  "types": "dist/esm/index.d.ts",
+  "files": [
+    "dist/cjs",
+    "dist/esm"
+  ],
+  "scripts": {
+    "api-documenter": "api-documenter markdown --input-folder ./dist/api/ --output-folder ./dist/docs/",
+    "api-extractor": "api-extractor run --local && cp dist/types.d.ts dist/cjs/index.d.ts && cp dist/types.d.ts dist/esm/index.d.ts",
+    "build": "npm run clean && tsc && node esbuild.mjs && npm run api-extractor && npm run api-documenter",
+    "clean": "rimraf dist",
+    "prettier": "prettier --write \"**/*.{ts,tsx,cts,mts,js,jsx,cjs,mjs,json}\""
+  },
+  "author": "",
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-organize-imports"
+    ],
+    "printWidth": 120,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "devDependencies": {
+    "@microsoft/api-documenter": "7.28.2",
+    "@microsoft/api-extractor": "7.55.2",
+    "esbuild": "0.27.1",
+    "prettier": "3.7.4",
+    "prettier-plugin-organize-imports": "4.3.0",
+    "rimraf": "6.1.2",
+    "vite": "7.2.7"
+  },
+  "packageManager": "npm@11.7.0",
+  "engines": {
+    "node": ">=22.0.0"
+  }
 }
