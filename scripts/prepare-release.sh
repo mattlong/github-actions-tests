@@ -49,10 +49,10 @@ BRANCH_NAME="version-$NEW_VERSION"
 git checkout -b "$BRANCH_NAME"
 
 # Set version in package.json
-sed -i'' -E -e "s/\"version\": \"[^\"]+\"/\"version\": \"$NEW_VERSION\"/g" package.json
+# sed -i'' -E -e "s/\"version\": \"[^\"]+\"/\"version\": \"$NEW_VERSION\"/g" package.json
 
 # Run `npm version $version`
-npm version "$NEW_VERSION"
+npm --no-git-tag-version version "$NEW_VERSION"
 
 # Generate release notes
 REPOSITORY_URL=https://github.com/mattlong/github-actions-tests
