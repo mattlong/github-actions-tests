@@ -37,12 +37,6 @@ jobs:
             echo "result=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: 'https://registry.npmjs.org'
-
       - name: Run when latest
         if: steps.check-latest.outputs.result == 'true'
         run: echo "Run when latest was executed"
@@ -58,6 +52,24 @@ jobs:
           else
             echo "Conditional when latest ELSE was executed"
           fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Update npm # Ensure npm 11.5.1 or later is installed
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish to NPM
+        run: ./scripts/publish.sh
 
       - name: Always last step
         run: |
