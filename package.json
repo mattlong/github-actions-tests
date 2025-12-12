@@ -1,6 +1,6 @@
 {
   "name": "github-actions-tests",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Package management test bed",
   "homepage": "https://github.com/mattlong/github-actions-tests#readme",
   "bugs": {
