@@ -1,6 +1,6 @@
 {
   "name": "@mattlong/gat",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Package management test bed",
   "homepage": "https://github.com/mattlong/github-actions-tests#readme",
   "bugs": {
@@ -35,8 +35,7 @@
     "api-extractor": "api-extractor run --local && cp dist/types.d.ts dist/cjs/index.d.ts && cp dist/types.d.ts dist/esm/index.d.ts",
     "build": "npm run clean && tsc && node esbuild.mjs && npm run api-extractor && npm run api-documenter",
     "clean": "rimraf dist",
-    "prettier": "prettier --write \"**/*.{ts,tsx,cts,mts,js,jsx,cjs,mjs,json}\"",
-    "publish": "npm run build && npm publish --access public"
+    "prettier": "prettier --write \"**/*.{ts,tsx,cts,mts,js,jsx,cjs,mjs,json}\""
   },
   "author": "",
   "prettier": {
