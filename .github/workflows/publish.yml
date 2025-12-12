@@ -39,6 +39,21 @@ jobs:
             echo "result=false" >> $GITHUB_OUTPUT
           fi
 
+
+      - name: Check if special release
+        id: check-special
+        run: |
+          CURRENT_TAG="${GITHUB_REF#refs/tags/}"
+          echo "Current Tag: ${CURRENT_TAG}"
+
+          if [[ "${CURRENT_TAG}" == *"-"* ]]; then
+            echo "Current tag contains a dash."
+            echo "result=true" >> $GITHUB_OUTPUT
+          else
+            echo "Current tag does not contain a dash."
+            echo "result=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run when latest
         if: steps.check-latest.outputs.result == 'true'
         run: echo "Run when latest was executed"
@@ -61,17 +76,23 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Update npm # Ensure npm 11.5.1 or later is installed
-        run: npm install -g npm@latest
-
       - name: Install dependencies
         run: npm ci
 
       - name: Build
         run: npm run build
 
+      - name: Update npm # Ensure npm 11.5.1 or later is installed
+        run: npm install -g npm@latest
+
       - name: Publish to NPM
         run: ./scripts/publish.sh
+        run: |
+          if [ "${{ steps.check-special.outputs.result }}" = "true" ]; then
+            ./scripts/publish.sh special
+          else
+            ./scripts/publish.sh
+          fi
 
       - name: Always last step
         run: |
